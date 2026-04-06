@@ -38,9 +38,12 @@ def main():
         locked_ver = lck.get("version", "")
         commit = lck.get("commit", "")[:12] if lck.get("commit") else ""
 
-        # Check if cached
+        # Check if cached — pack.toml may be at root (single-pack) or in
+        # a subdirectory matching the pack name (multi-pack tap with path=)
         cache = os.path.join(packs_cache_dir(), name)
-        cached = os.path.isfile(os.path.join(cache, "pack.toml"))
+        pack_path = src.get("path", "") if isinstance(src, dict) else ""
+        check_dir = os.path.join(cache, pack_path) if pack_path else cache
+        cached = os.path.isfile(os.path.join(check_dir, "pack.toml"))
 
         status = "\u2713" if cached else "\u2717 not cached"
 
