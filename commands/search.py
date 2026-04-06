@@ -10,11 +10,7 @@ from common import load_taps, taps_cache_dir, git_tags, resolve_version, read_to
 
 def main():
     args = sys.argv[1:]
-    if not args:
-        print("usage: gc packman search <query>", file=sys.stderr)
-        sys.exit(1)
-
-    query = args[0].lower()
+    query = args[0].lower() if args else ""
     taps = load_taps()
 
     if not taps:
