@@ -1,0 +1,99 @@
+# gc-packman — tap-based package manager for Gas City packs.
+#
+# Provides gc packman commands for discovering, installing, and
+# managing packs from git-based tap repositories.
+#
+# Include in your city:
+#   [workspace]
+#   includes = ["path/to/gc-packman"]
+#
+# Then use:
+#   gc packman tap add <name> <url>
+#   gc packman add <pack>
+#   gc packman list
+
+[pack]
+name = "packman"
+version = "0.1.0"
+schema = 1
+
+# ── Tap management ──────────────────────────────────────────────────
+
+[[commands]]
+name = "tap"
+description = "Manage tap registrations (add, remove, list, update)"
+long_description = "commands/tap-help.txt"
+script = "commands/tap.py"
+
+# ── Pack lifecycle ──────────────────────────────────────────────────
+
+[[commands]]
+name = "add"
+description = "Add a pack to imports, resolve version, fetch, lock"
+long_description = "commands/add-help.txt"
+script = "commands/add.py"
+
+[[commands]]
+name = "remove"
+description = "Remove a pack from imports and update lock"
+long_description = "commands/remove-help.txt"
+script = "commands/remove.py"
+
+[[commands]]
+name = "install"
+description = "Install all packs from lock file (clean install)"
+long_description = "commands/install-help.txt"
+script = "commands/install.py"
+
+[[commands]]
+name = "update"
+description = "Update packs to latest compatible versions"
+long_description = "commands/update-help.txt"
+script = "commands/update.py"
+
+[[commands]]
+name = "list"
+description = "Show imported packs with locked versions"
+long_description = "commands/list-help.txt"
+script = "commands/list.py"
+
+[[commands]]
+name = "outdated"
+description = "Show packs with newer versions available"
+long_description = "commands/outdated-help.txt"
+script = "commands/outdated.py"
+
+# ── Discovery ───────────────────────────────────────────────────────
+
+[[commands]]
+name = "search"
+description = "Search for packs across registered taps"
+long_description = "commands/search-help.txt"
+script = "commands/search.py"
+
+[[commands]]
+name = "info"
+description = "Show pack metadata and available versions"
+long_description = "commands/info-help.txt"
+script = "commands/info.py"
+
+# ── Authoring ───────────────────────────────────────────────────────
+
+[[commands]]
+name = "init"
+description = "Scaffold a new pack directory"
+long_description = "commands/init-help.txt"
+script = "commands/init.py"
+
+[[commands]]
+name = "validate"
+description = "Check pack structure and self-containment"
+long_description = "commands/validate-help.txt"
+script = "commands/validate.py"
+
+# ── Diagnostics ─────────────────────────────────────────────────────
+
+[[doctor]]
+name = "python3"
+description = "Verify Python 3 is available for packman commands"
+script = "doctor/check-python.sh"

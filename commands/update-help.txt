@@ -1,0 +1,15 @@
+Update packs to latest compatible versions.
+
+Re-resolves version constraints from pack.toml against available
+tags in the tap repo. Updates pack.lock and cached contents for
+any pack with a newer compatible version.
+
+Usage:
+  gc packman update [<pack>]
+
+Arguments:
+  <pack>    Optional. Update only this pack. If omitted, updates all.
+
+Examples:
+  gc packman update
+  gc packman update gastown

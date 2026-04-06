@@ -1,0 +1,13 @@
+Install all packs from pack.lock (clean install).
+
+Reads pack.lock and fetches each pack at its locked version and
+commit. Verifies content hashes match. Analogous to "npm ci".
+
+Use this after cloning a city repo or when .gc/cache/packs/ is
+missing or stale.
+
+Usage:
+  gc packman install
+
+Examples:
+  gc packman install

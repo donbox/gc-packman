@@ -1,0 +1,15 @@
+Scaffold a new pack directory.
+
+Creates a pack directory with pack.toml and standard subdirectories
+(agents/, formulas/, scripts/).
+
+Usage:
+  gc packman init <name> [--dir <path>]
+
+Arguments:
+  <name>      Pack name
+  --dir       Target directory (default: packs/<name>)
+
+Examples:
+  gc packman init my-pack
+  gc packman init my-pack --dir ./custom-location

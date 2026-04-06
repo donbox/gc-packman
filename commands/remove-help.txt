@@ -1,0 +1,11 @@
+Remove a pack from the city's imports.
+
+Removes the [imports.<name>] section from pack.toml, removes the
+entry from pack.lock, and deletes the cached pack contents.
+
+Usage:
+  gc packman remove <pack>
+
+Examples:
+  gc packman remove gastown
+  gc packman remove maintenance

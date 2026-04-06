@@ -1,0 +1,16 @@
+Manage tap registrations.
+
+A tap is a git repository containing one or more packs. Taps are
+registered by short name and cached at ~/.gc/cache/taps/.
+
+Subcommands:
+  add <name> <url>     Register a tap (clones the repo)
+  remove <name>        Unregister a tap (cache left in place)
+  list                 Show all registered taps
+  update [<name>]      Fetch latest from tap repos
+
+Examples:
+  gc packman tap add gastownhall https://github.com/gastownhall/packs
+  gc packman tap add myteam git@github.com:myteam/gc-packs.git
+  gc packman tap list
+  gc packman tap update

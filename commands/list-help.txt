@@ -1,0 +1,7 @@
+Show imported packs with locked versions.
+
+Reads pack.toml and pack.lock to display each imported pack with
+its tap, version constraint, locked version, and cache status.
+
+Usage:
+  gc packman list

@@ -1,0 +1,18 @@
+Add a pack to the city's imports.
+
+Resolves the pack name through registered taps, finds the best
+matching version, fetches the pack contents, updates pack.toml
+with an import entry, and writes pack.lock with the resolved version.
+
+Usage:
+  gc packman add <pack> [--version <constraint>]
+
+Arguments:
+  <pack>         Pack name (e.g. "gastown") or qualified name ("gastownhall/gastown")
+  --version      Version constraint (e.g. "^1.2", "~1.0.3", "1.2.3")
+                 Defaults to ^major.minor of the latest version.
+
+Examples:
+  gc packman add gastown
+  gc packman add gastown --version "^1.2"
+  gc packman add gastownhall/maintenance --version "~2.0"

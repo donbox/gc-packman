@@ -1,0 +1,12 @@
+Search for packs across registered taps.
+
+Scans all registered taps for packs matching the query string
+against pack names and descriptions.
+
+Usage:
+  gc packman search <query>
+
+Examples:
+  gc packman search gastown
+  gc packman search maintenance
+  gc packman search dolt

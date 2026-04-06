@@ -1,0 +1,14 @@
+Check pack structure and self-containment.
+
+Validates that a pack directory has a valid pack.toml, required
+fields, and no path references that escape the pack boundary.
+
+Usage:
+  gc packman validate [<path>]
+
+Arguments:
+  <path>    Pack directory to validate (default: current directory)
+
+Examples:
+  gc packman validate
+  gc packman validate packs/gastown

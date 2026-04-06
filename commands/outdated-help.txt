@@ -1,0 +1,7 @@
+Show packs with newer versions available.
+
+Compares locked versions in pack.lock against available tags in
+tap repos, filtered by version constraints in pack.toml.
+
+Usage:
+  gc packman outdated

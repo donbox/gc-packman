@@ -1,0 +1,11 @@
+Show pack metadata and available versions.
+
+Displays the pack's name, tap, description, available versions,
+and directory contents.
+
+Usage:
+  gc packman info <pack>
+
+Examples:
+  gc packman info gastown
+  gc packman info gastownhall/maintenance
