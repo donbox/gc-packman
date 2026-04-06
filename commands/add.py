@@ -111,33 +111,38 @@ def main():
         tag = None
         print("  No tagged versions found, using HEAD")
 
-    # Check out the pack at the resolved version
+    # Clone the source repo into the pack cache.
+    # This matches what gc pack fetch does: .gc/cache/packs/<name>/ is a git
+    # clone of the source repo. For multi-pack taps, path=<name> tells the
+    # loader which subdirectory within the clone is the actual pack.
     dest = os.path.join(packs_cache_dir(), pack_name)
-    if os.path.exists(dest):
-        shutil.rmtree(dest)
-
-    if tag:
-        git("checkout", tag, cwd=tap_cache, check=False)
-
-    if is_single_pack:
-        shutil.copytree(tap_cache, dest, ignore=shutil.ignore_patterns(".git"))
+    if os.path.isdir(os.path.join(dest, ".git")):
+        # Already cloned — fetch and checkout the right ref
+        git("fetch", "origin", cwd=dest)
+        git("checkout", "--force", ".", cwd=dest, check=False)
+        git("clean", "-fd", cwd=dest, check=False)
+        if tag:
+            git("checkout", tag, cwd=dest, check=False)
     else:
-        src = os.path.join(tap_cache, pack_name)
-        if os.path.isdir(src):
-            shutil.copytree(src, dest, ignore=shutil.ignore_patterns(".git"))
-        else:
-            print(f"  Pack directory not found at tag {tag}", file=sys.stderr)
-            sys.exit(1)
+        if os.path.exists(dest):
+            shutil.rmtree(dest)
+        git_clone(tap_url, dest, ref=tag, depth=1)
 
-    commit = git_rev_parse(tap_cache)
-    chash = content_hash(dest)
+    commit = git_rev_parse(dest)
+
+    # For multi-pack taps, the pack lives in a subdirectory
+    pack_subdir = pack_name if not is_single_pack else ""
+    pack_root = os.path.join(dest, pack_subdir) if pack_subdir else dest
+    if not os.path.isfile(os.path.join(pack_root, "pack.toml")):
+        print(f"  Pack directory not found at {pack_subdir}/ in cloned repo", file=sys.stderr)
+        sys.exit(1)
+
+    chash = content_hash(pack_root)
 
     print(f"  Fetched \u2192 .gc/cache/packs/{pack_name}/")
 
     # Update city.toml — add [packs.<name>] and workspace.includes entry
-    # path is empty because we extract just the pack subdirectory into the cache,
-    # so .gc/cache/packs/<name>/ IS the pack root — no further subpath needed.
-    update_city_toml(pack_name, tap_url, tag, "")
+    update_city_toml(pack_name, tap_url, tag, pack_subdir)
     print(f"  Updated city.toml")
 
     # Update pack.lock
