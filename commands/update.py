@@ -8,7 +8,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 from common import (
-    pack_toml_path, pack_lock_path, packs_cache_dir,
+    city_toml_path, pack_lock_path, packs_cache_dir,
     load_taps, taps_cache_dir,
     git, git_tags, git_rev_parse,
     resolve_version,
@@ -41,13 +41,13 @@ def main():
     args = sys.argv[1:]
     target_pack = args[0] if args else None
 
-    toml_path = pack_toml_path()
+    toml_path = city_toml_path()
     lock_path = pack_lock_path()
 
     config = read_toml_simple(toml_path) if os.path.exists(toml_path) else {}
     lock = read_toml_simple(lock_path) if os.path.exists(lock_path) else {}
 
-    imports = config.get("imports", {})
+    imports = config.get("packs", {})
     locked = lock.get("packs", {})
 
     if not imports:

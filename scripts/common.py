@@ -47,9 +47,9 @@ def packs_cache_dir():
     return d
 
 
-def pack_toml_path():
-    """Return the path to the city's pack.toml."""
-    return os.path.join(city_root(), "pack.toml")
+def city_toml_path():
+    """Return the path to the city's city.toml."""
+    return os.path.join(city_root(), "city.toml")
 
 
 def pack_lock_path():
@@ -267,18 +267,23 @@ def find_pack_in_taps(pack_name, tap_name=None):
 import re
 
 _SEMVER_RE = re.compile(
-    r"^v?(\d+)\.(\d+)\.(\d+)"
+    r"^v?(\d+)\.(\d+)(?:\.(\d+))?"
     r"(?:-([\w.]+))?"       # pre-release
     r"(?:\+([\w.]+))?$"     # build metadata
 )
 
 
 def parse_semver(s):
-    """Parse a semver string into (major, minor, patch, pre, build) or None."""
+    """Parse a semver string into (major, minor, patch, pre, build) or None.
+
+    Accepts both 2-component (1.2) and 3-component (1.2.3) versions.
+    A missing patch defaults to 0.
+    """
     m = _SEMVER_RE.match(s)
     if not m:
         return None
-    major, minor, patch = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    major, minor = int(m.group(1)), int(m.group(2))
+    patch = int(m.group(3)) if m.group(3) is not None else 0
     pre = m.group(4) or ""
     build = m.group(5) or ""
     return (major, minor, patch, pre, build)

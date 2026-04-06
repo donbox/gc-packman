@@ -1,36 +1,40 @@
 #!/usr/bin/env python3
-"""gc packman list — show imported packs with locked versions."""
+"""gc packman list — show packs from city.toml with locked versions.
+
+Pre-v2 format: reads [packs] from city.toml and pack.lock.
+"""
 
 import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
-from common import city_root, pack_toml_path, pack_lock_path, packs_cache_dir, read_toml_simple
+from common import city_root, city_toml_path, pack_lock_path, packs_cache_dir, read_toml_simple
 
 
 def main():
-    toml_path = pack_toml_path()
+    toml_path = city_toml_path()
     lock_path = pack_lock_path()
 
     config = read_toml_simple(toml_path) if os.path.exists(toml_path) else {}
     lock = read_toml_simple(lock_path) if os.path.exists(lock_path) else {}
 
-    imports = config.get("imports", {})
+    packs = config.get("packs", {})
     locked = lock.get("packs", {})
 
-    if not imports and not locked:
-        print("No packs imported.")
+    if not packs and not locked:
+        print("No packs configured.")
         print("  Use 'gc packman add <pack>' to add one.")
         return
 
     print(f"Packs in {os.path.relpath(toml_path)}:\n")
 
-    for name in sorted(set(list(imports.keys()) + list(locked.keys()))):
-        imp = imports.get(name, {})
+    for name in sorted(set(list(packs.keys()) + list(locked.keys()))):
+        src = packs.get(name, {})
         lck = locked.get(name, {})
 
-        tap = imp.get("tap", lck.get("tap", ""))
-        constraint = imp.get("version", "")
+        tap = lck.get("tap", "")
+        source = src.get("source", lck.get("source", "")) if isinstance(src, dict) else ""
+        ref = src.get("ref", "") if isinstance(src, dict) else ""
         locked_ver = lck.get("version", "")
         commit = lck.get("commit", "")[:12] if lck.get("commit") else ""
 
@@ -44,22 +48,15 @@ def main():
         if tap:
             parts.append(f"tap={tap}")
         if locked_ver:
-            parts.append(f"v{locked_ver}")
-        if constraint:
-            parts.append(f"({constraint})")
+            v = locked_ver if locked_ver.startswith("v") else f"v{locked_ver}"
+            parts.append(v)
+        elif ref:
+            parts.append(f"ref={ref}")
         if commit:
             parts.append(f"[{commit}]")
         parts.append(status)
 
         print("  ".join(parts))
-
-    in_toml = set(imports.keys())
-    in_lock = set(locked.keys())
-    if in_lock - in_toml:
-        print(f"\n  Warning: locked but not in imports: {', '.join(in_lock - in_toml)}")
-    if in_toml - in_lock:
-        print(f"\n  Warning: imported but not locked: {', '.join(in_toml - in_lock)}")
-        print(f"  Run 'gc packman install' to resolve.")
 
 
 if __name__ == "__main__":

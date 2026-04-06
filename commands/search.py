@@ -52,7 +52,7 @@ def main():
                 # Try to find latest version from tags
                 tags = git_tags(cwd=cache)
                 best = resolve_version(tags, entry)
-                ver_display = f"v{best[0]}" if best else (f"v{version}" if version else "")
+                ver_display = best[0] if best else (f"v{version}" if version else "")
 
                 results.append((tap_name, entry, description, ver_display))
 
@@ -67,7 +67,7 @@ def main():
                 version = pack_info.get("version", "")
                 tags = git_tags(cwd=cache)
                 best = resolve_version(tags, name)
-                ver_display = f"v{best[0]}" if best else (f"v{version}" if version else "")
+                ver_display = best[0] if best else (f"v{version}" if version else "")
                 results.append((tap_name, name, description, ver_display))
 
     if not results:
