@@ -110,24 +110,27 @@ def main():
         elif expected_commit:
             git("checkout", expected_commit, cwd=tap_cache, check=False)
 
-        # Copy pack contents
-        if os.path.exists(dest):
-            shutil.rmtree(dest)
-
-        src = os.path.join(tap_cache, name)
-        if os.path.isdir(src):
-            shutil.copytree(src, dest, ignore=shutil.ignore_patterns(".git"))
-        elif os.path.isfile(os.path.join(tap_cache, "pack.toml")):
-            # Single-pack tap
-            shutil.copytree(tap_cache, dest, ignore=shutil.ignore_patterns(".git"))
+        # Clone source repo into pack cache (matches gc pack fetch behavior)
+        if os.path.isdir(os.path.join(dest, ".git")):
+            git("fetch", "origin", cwd=dest)
+            git("checkout", "--force", ".", cwd=dest, check=False)
+            git("clean", "-fd", cwd=dest, check=False)
+            if ref != "HEAD":
+                git("checkout", ref, cwd=dest, check=False)
+            elif expected_commit:
+                git("checkout", expected_commit, cwd=dest, check=False)
         else:
-            print(f"  {name}: pack directory not found in tap", file=sys.stderr)
-            errors.append(name)
-            continue
+            if os.path.exists(dest):
+                shutil.rmtree(dest)
+            git_clone(source, dest, ref=ref if ref != "HEAD" else None, depth=1)
 
-        # Verify hash
+        # Verify hash against the pack subdirectory
+        pack_root = os.path.join(dest, name)
+        if not os.path.isfile(os.path.join(pack_root, "pack.toml")):
+            pack_root = dest  # single-pack tap
+
         if expected_hash:
-            actual = "sha256:" + content_hash(dest)
+            actual = "sha256:" + content_hash(pack_root)
             if actual != expected_hash:
                 print(f"  {name} v{version} \u2717 HASH MISMATCH", file=sys.stderr)
                 print(f"    expected: {expected_hash}", file=sys.stderr)

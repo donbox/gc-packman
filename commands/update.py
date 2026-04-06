@@ -95,30 +95,33 @@ def main():
 
         print(f"  {name}: v{locked_ver} \u2192 v{latest_ver}")
 
-        # Checkout and copy
-        git("checkout", "--force", ".", cwd=tap_cache, check=False)
-        git("checkout", tag, cwd=tap_cache, check=False)
-
-        dest = os.path.join(packs_cache_dir(), name)
-        if os.path.exists(dest):
-            shutil.rmtree(dest)
-
-        src = os.path.join(tap_cache, name)
-        if os.path.isdir(src):
-            shutil.copytree(src, dest, ignore=shutil.ignore_patterns(".git"))
-        elif os.path.isfile(os.path.join(tap_cache, "pack.toml")):
-            shutil.copytree(tap_cache, dest, ignore=shutil.ignore_patterns(".git"))
-        else:
-            print(f"  {name}: pack directory not found at tag {tag}", file=sys.stderr)
-            continue
-
-        commit = git_rev_parse(tap_cache)
-        chash = content_hash(dest)
-
-        # Update lock
+        # Update the pack cache (a git clone of the source repo)
         taps = load_taps()
         tap_url = taps.get(tap_name, {}).get("url", lck.get("source", ""))
 
+        dest = os.path.join(packs_cache_dir(), name)
+        if os.path.isdir(os.path.join(dest, ".git")):
+            git("fetch", "origin", cwd=dest)
+            git("checkout", "--force", ".", cwd=dest, check=False)
+            git("clean", "-fd", cwd=dest, check=False)
+            git("checkout", tag, cwd=dest, check=False)
+        else:
+            if os.path.exists(dest):
+                shutil.rmtree(dest)
+            from common import git_clone
+            git_clone(tap_url, dest, ref=tag, depth=1)
+
+        commit = git_rev_parse(dest)
+
+        # Hash just the pack subdirectory for multi-pack taps
+        pack_subdir = name  # multi-pack: subdir matches pack name
+        pack_root = os.path.join(dest, pack_subdir)
+        if not os.path.isfile(os.path.join(pack_root, "pack.toml")):
+            # Single-pack tap: pack.toml at root
+            pack_root = dest
+        chash = content_hash(pack_root)
+
+        # Update lock
         locked[name] = {
             "tap": tap_name,
             "version": latest_ver,
