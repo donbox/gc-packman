@@ -2,6 +2,7 @@
 """gc packman list — show packs from city.toml with locked versions.
 
 Pre-v2 format: reads [packs] from city.toml and pack.lock.
+Output matches gc pack list format, with additional version/tap info.
 """
 
 import os
@@ -26,40 +27,49 @@ def main():
         print("  Use 'gc packman add <pack>' to add one.")
         return
 
-    print(f"Packs in {os.path.relpath(toml_path)}:\n")
-
     for name in sorted(set(list(packs.keys()) + list(locked.keys()))):
         src = packs.get(name, {})
         lck = locked.get(name, {})
 
-        tap = lck.get("tap", "")
         source = src.get("source", lck.get("source", "")) if isinstance(src, dict) else ""
         ref = src.get("ref", "") if isinstance(src, dict) else ""
         locked_ver = lck.get("version", "")
+        tap = lck.get("tap", "")
         commit = lck.get("commit", "")[:12] if lck.get("commit") else ""
 
-        # Check if cached — pack.toml may be at root (single-pack) or in
-        # a subdirectory matching the pack name (multi-pack tap with path=)
+        # Check if cached
         cache = os.path.join(packs_cache_dir(), name)
         pack_path = src.get("path", "") if isinstance(src, dict) else ""
         check_dir = os.path.join(cache, pack_path) if pack_path else cache
         cached = os.path.isfile(os.path.join(check_dir, "pack.toml"))
+        status = "cached" if cached else "not cached"
 
-        status = "\u2713" if cached else "\u2717 not cached"
-
-        parts = [f"  {name:20s}"]
-        if tap:
-            parts.append(f"tap={tap}")
+        # Build ref/version display
         if locked_ver:
             v = locked_ver if locked_ver.startswith("v") else f"v{locked_ver}"
-            parts.append(v)
+            ref_display = f"ref={ref}" if ref else ""
         elif ref:
-            parts.append(f"ref={ref}")
-        if commit:
-            parts.append(f"[{commit}]")
-        parts.append(status)
+            v = ""
+            ref_display = f"ref={ref}"
+        else:
+            v = ""
+            ref_display = "ref=HEAD"
 
-        print("  ".join(parts))
+        # Format: name  source  ref=  version  tap  commit  status
+        # Match gc pack list column widths
+        parts = f"{'%-20s' % name} {'%-40s' % source}"
+        extras = []
+        if ref_display:
+            extras.append(f"{'%-16s' % ref_display}")
+        if v:
+            extras.append(v)
+        if tap:
+            extras.append(f"tap={tap}")
+        if commit:
+            extras.append(f"commit={commit}")
+        extras.append(status)
+
+        print(f"{parts} {'  '.join(extras)}")
 
 
 if __name__ == "__main__":
