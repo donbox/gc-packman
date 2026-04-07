@@ -1,0 +1,12 @@
+Download a pack to the local cache without installing it.
+
+Fetches the pack from a registered tap into .gc/cache/packs/ but
+does not modify city.toml or pack.lock. Use 'gc packman add' to
+install a fetched pack into the city.
+
+Usage:
+  gc packman fetch <pack> [--version <constraint>]
+
+Examples:
+  gc packman fetch fb/foo
+  gc packman fetch fb/bar --version "^2.0"

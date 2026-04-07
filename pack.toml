@@ -28,6 +28,12 @@ script = "commands/tap.py"
 # ── Pack lifecycle ──────────────────────────────────────────────────
 
 [[commands]]
+name = "fetch"
+description = "Download a pack to the local cache without installing"
+long_description = "commands/fetch-help.txt"
+script = "commands/fetch.py"
+
+[[commands]]
 name = "add"
 description = "Add a pack to imports, resolve version, fetch, lock"
 long_description = "commands/add-help.txt"
